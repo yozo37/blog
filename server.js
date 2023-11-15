@@ -20,6 +20,26 @@ app.get('/api/articles/', async (req, res) => {
     console.log(rows);
     res.status(200).json(rows);
 });
+
+app.post('/api/articles/', async (req, res) => {
+    try {
+        const { titre, contenu, utilisateur_id } = req.body;
+
+        if (!titre || !contenu || !utilisateur_id) {
+            return res.status(400).json({ error: 'Title, content, and user ID are required.' });
+        }
+
+        const conn = await pool.getConnection();
+        const result = await conn.query('INSERT INTO Articles (titre, contenu, utilisateur_id) VALUES (?, ?, ?)', [titre, contenu, utilisateur_id]);
+
+        res.status(201).json({ article_id: result.insertId, message: 'Article created successfully.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
 app.get('/api/utilisateurs/', async (req, res) => {
     console.log("lancement de la connexion");
     const conn = await pool.getConnection();
@@ -30,7 +50,26 @@ app.get('/api/utilisateurs/', async (req, res) => {
 });
 
 
+app.post('/api/utilisateurs/', async (req, res) => {
+    try {
+        const { email, mot_de_passe, nom, prenom } = req.body;
 
+        if (!email || !mot_de_passe || !nom || !prenom) {
+            return res.status(400).json({ error: 'Email, password, name, and surname are required.' });
+        }
+
+        const conn = await pool.getConnection();
+        const result = await conn.query('INSERT INTO Utilisateurs (email, mot_de_passe, nom, prenom) VALUES (?, ?, ?, ?)', [email, mot_de_passe, nom, prenom]);
+
+
+        const utilisateurId = Number(result.insertId);
+
+        res.status(201).json({ utilisateur_id: utilisateurId, message: 'User created successfully.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 app.listen(3000, () => {
     console.log("Serveur a l'ecoute");
