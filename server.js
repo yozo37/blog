@@ -30,9 +30,13 @@ app.post('/api/articles/', async (req, res) => {
         }
 
         const conn = await pool.getConnection();
-        const result = await conn.query('INSERT INTO Articles (titre, contenu, utilisateur_id) VALUES (?, ?, ?)', [titre, contenu, utilisateur_id]);
-
-        res.status(201).json({ article_id: result.insertId, message: 'Article created successfully.' });
+        try {
+            const result = await conn.query('INSERT INTO Articles (titre, contenu, utilisateur_id) VALUES (?, ?, ?)', [titre, contenu, utilisateur_id]);
+            const articleId = Number(result.insertId);
+            res.status(201).json({ article_id: articleId, message: 'Article created successfully.' });
+        } finally {
+            conn.release(); 
+        }
     } catch (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
