@@ -31,9 +31,13 @@ app.post('/api/articles/', async (req, res) => {
         }
 
         const conn = await pool.getConnection();
-        const result = await conn.query('INSERT INTO Articles (titre, contenu, utilisateur_id) VALUES (?, ?, ?)', [titre, contenu, utilisateur_id]);
-
-        res.status(201).json({ article_id: result.insertId, message: 'Article created successfully.' });
+        try {
+            const result = await conn.query('INSERT INTO Articles (titre, contenu, utilisateur_id) VALUES (?, ?, ?)', [titre, contenu, utilisateur_id]);
+            const articleId = Number(result.insertId);
+            res.status(201).json({ article_id: articleId, message: 'Article created successfully.' });
+        } finally {
+            conn.release(); 
+        }
     } catch (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
@@ -68,9 +72,10 @@ app.post('/api/utilisateurs/', async (req, res) => {
             return res.status(400).json({ error: 'Email, password, name, and surname are required.' });
         }
 
-        const conn = await pool.getConnection();
-        const result = await conn.query('INSERT INTO Utilisateurs (email, mot_de_passe, nom, prenom) VALUES (?, ?, ?, ?)', [email, mot_de_passe, nom, prenom]);
+        const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
+        const conn = await pool.getConnection();
+        const result = await conn.query('INSERT INTO Utilisateurs (email, mot_de_passe, nom, prenom) VALUES (?, ?, ?, ?)', [email, hashedPassword, nom, prenom]);
 
         const utilisateurId = Number(result.insertId);
 
@@ -80,6 +85,7 @@ app.post('/api/utilisateurs/', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 app.post('/api/articles/', async (req, res) => {
     try {
