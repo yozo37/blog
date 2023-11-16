@@ -71,9 +71,10 @@ app.post('/api/utilisateurs/', async (req, res) => {
             return res.status(400).json({ error: 'Email, password, name, and surname are required.' });
         }
 
-        const conn = await pool.getConnection();
-        const result = await conn.query('INSERT INTO Utilisateurs (email, mot_de_passe, nom, prenom) VALUES (?, ?, ?, ?)', [email, mot_de_passe, nom, prenom]);
+        const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
+        const conn = await pool.getConnection();
+        const result = await conn.query('INSERT INTO Utilisateurs (email, mot_de_passe, nom, prenom) VALUES (?, ?, ?, ?)', [email, hashedPassword, nom, prenom]);
 
         const utilisateurId = Number(result.insertId);
 
@@ -83,6 +84,7 @@ app.post('/api/utilisateurs/', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 app.post('/api/articles/', async (req, res) => {
     try {
@@ -104,24 +106,6 @@ app.post('/api/articles/', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-// app.get('/api/utilisateurs/:id', (req, res) => {
-//     bcrypt.hash(req.body.reponse, 10)
-//         .then(async (hash) => {
-//             console.log("lancement de la connexion");
-//             const conn = await pool.getConnection();
-//             console.log("lancement de la requete");
-
-//             console.log(req.body);
-//             let requete = 'INSERT INTO utilisateurs (email, mot_de_passe, nom, prenom) VALUES (?, ?, ?, ?);';
-//             let rows = await conn.query(requete, [req.body.email, hash, req.body.nom, req.body.prenom]);
-//             console.log(rows);
-//             res.status(200).json(rows.affectedRows);
-//         })
-//         .catch((error) => res.status(500).json(error));
-// });
-
-
-
 
 
 app.listen(3000, () => {
