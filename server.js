@@ -60,6 +60,7 @@ app.get('/api/utilisateurs/:id', async (req, res) => {
 });
 
 app.post('/api/utilisateurs/', async (req, res) => {
+     console.log(req.body);
     try {
         const { email, mot_de_passe, nom, prenom } = req.body;
 
@@ -100,26 +101,9 @@ app.post('/api/articles/', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-// app.get('/api/utilisateurs/:id', (req, res) => {
-//     bcrypt.hash(req.body.reponse, 10)
-//         .then(async (hash) => {
-//             console.log("lancement de la connexion");
-//             const conn = await pool.getConnection();
-//             console.log("lancement de la requete");
-
-//             console.log(req.body);
-//             let requete = 'INSERT INTO utilisateurs (email, mot_de_passe, nom, prenom) VALUES (?, ?, ?, ?);';
-//             let rows = await conn.query(requete, [req.body.email, hash, req.body.nom, req.body.prenom]);
-//             console.log(rows);
-//             res.status(200).json(rows.affectedRows);
-//         })
-//         .catch((error) => res.status(500).json(error));
-// });
-
-
 
 
 
 app.listen(3000, () => {
-    console.log("Serveur a l'ecoute");
+    console.log("Serveur a l'ecoute jdeig");
 });
